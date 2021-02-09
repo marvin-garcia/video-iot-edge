@@ -46,7 +46,7 @@ class VideoStream:
     def more(self):
         return self.Q.qsize() > 0
 
-    def _capture(self, width=640, height=480, framerate=32):
+    def _capture(self, width=640, height=480, framerate=32, delay=0.5):
         try:
             self.camera.resolution = (width, height)
             self.camera.framerate = framerate
@@ -61,11 +61,12 @@ class VideoStream:
                     if self.stopped:
                         break
 
-                    # grab the raw NumPy array representing the image, then initialize the timestamp and occupied/unoccupied text
+                    # grab the raw NumPy array representing the image, then convert it to a PIL image object
                     image = self._convert_image(frame.array)
                     self.Q.put(image)
 
                     raw_capture.truncate(0)
+                    time.sleep(delay)
 
         except Exception as e:
             self.close()
