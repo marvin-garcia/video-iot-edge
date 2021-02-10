@@ -1,7 +1,6 @@
 import png
 import time
 import PIL
-
 from PIL import Image
 from picamera import PiCamera
 from picamera.array import PiRGBArray
@@ -21,7 +20,7 @@ class ImageStream:
             print(str(e))
             self.close()
 
-    def _capture(self, width=1280, height=720) -> PIL.Image.Image:
+    def _capture(self, width=1280, height=720) -> numpy.ndarray:
         try:
             self.camera.resolution = (width, height)
             raw_capture = PiRGBArray(self.camera)
@@ -38,7 +37,7 @@ class ImageStream:
             print(str(e))
             self.close()
 
-    def _convert(self, image_array: PIL.Image.Image, mode: str = "L") -> bool:
+    def _convert(self, image_array: numpy.ndarray, mode: str = "L") -> bool:
         try:
             # using numpy: self.image = png.from_array(image_array, mode=mode)
             self.image = Image.fromarray(image_array)
