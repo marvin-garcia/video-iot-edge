@@ -351,3 +351,4 @@ MigrationBackup/
 
 .vscode/
 .arm32v7/
+.amd64/
