@@ -1,6 +1,7 @@
 import png
 import time
 import PIL
+import numpy
 from PIL import Image
 from picamera import PiCamera
 from picamera.array import PiRGBArray
