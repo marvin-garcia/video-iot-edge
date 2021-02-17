@@ -11,16 +11,15 @@ class ImageStream:
     def image(self) -> PIL.Image.Image:
         pass
 
-    def __init__(self, format="rgb"):
+    def __init__(self):
         try:
-            self.__format = format
             self.camera = PiCamera()
 
         except Exception as e:
             print(str(e))
             self.close()
 
-    def _capture(self, width=1280, height=720) -> numpy.ndarray:
+    def _capture(self, width=1280, height=720, format="rgb") -> numpy.ndarray:
         try:
             self.camera.resolution = (width, height)
             raw_capture = PiRGBArray(self.camera)
@@ -28,7 +27,7 @@ class ImageStream:
             # allow the camera to warmup
             time.sleep(0.1)
 
-            self.camera.capture(raw_capture, format=self.__format)
+            self.camera.capture(raw_capture, format=format)
             image_array = raw_capture.array
 
             return image_array
