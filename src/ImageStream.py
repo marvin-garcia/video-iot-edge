@@ -11,10 +11,9 @@ class ImageStream:
     def image(self) -> PIL.Image.Image:
         pass
 
-    def __init__(self):
+    def __init__(self, format="rgb"):
         try:
-            # NOTE: do not use RGB as image format, it messes up with the RaspberryPi camera
-            self.__format = "bgr"
+            self.__format = format
             self.camera = PiCamera()
 
         except Exception as e:
