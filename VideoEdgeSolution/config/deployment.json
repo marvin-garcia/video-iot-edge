@@ -1,0 +1,105 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "modules": {
+          "cameracapture": {
+            "settings": {
+              "image": "marvingarcia/cameracapture:2.1",
+              "createOptions": "{\"Hostname\":\"cameracapture\",\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}]},\"Binds\":[\"/opt/vc:/opt/vc\"],\"Devices\":[{\"PathOnHost\":\"/dev/vchiq\",\"PathInContainer\":\"/dev/vchiq\",\"CgroupPermissions\":\"rwm\"},{\"PathOnHost\":\"/dev/vcsm-cma\",\"PathInContainer\":\"/dev/vcsm-cma\",\"CgroupPermissions\":\"rwm\"}]}}"
+            },
+            "type": "docker",
+            "version": "1.0",
+            "env": {
+              "LD_LIBRARY_PATH": {
+                "value": "/opt/vc/lib"
+              }
+            },
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "imageanalyzer": {
+            "settings": {
+              "image": "marvingarcia/imageanalyzer:1.8",
+              "createOptions": ""
+            },
+            "type": "docker",
+            "version": "1.0",
+            "env": {
+              "CAPTURE_INTERVAL": {
+                "value": "10"
+              },
+              "CAMERA_CAPTURE_URL": {
+                "value": "http://cameracapture:5000"
+              },
+              "COMPUTER_VISION_URL": {
+                "value": "https://marvcomputervision.cognitiveservices.azure.com"
+              },
+              "COMPUTER_VISION_KEY": {
+                "value": "e7f24ff2d7e346d49d7f0c994ba02f3e"
+              },
+              "CONFIDENCE_THRESHOLD": {
+                "value": "0.7"
+              },
+              "DEBUG": {
+                "value": "True"
+              }
+            },
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        },
+        "runtime": {
+          "settings": {
+            "minDockerVersion": "v1.25"
+          },
+          "type": "docker"
+        },
+        "schemaVersion": "1.1",
+        "systemModules": {
+          "edgeAgent": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": ""
+            },
+            "type": "docker"
+          },
+          "edgeHub": {
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.1",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"443/tcp\":[{\"HostPort\":\"443\"}],\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}]}}}"
+            },
+            "type": "docker",
+            "env": {
+              "OptimizeForPerformance": {
+                "value": "false"
+              }
+            },
+            "status": "running",
+            "restartPolicy": "always"
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "routes": {
+          "ImageAnalyzerToHub": "FROM /messages/modules/imageanalyzer/outputs/* INTO $upstream"
+        },
+        "schemaVersion": "1.1",
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "pythonedgesample": {
+      "properties.desired": {}
+    },
+    "cameracapture": {
+      "properties.desired": {}
+    },
+    "imageanalyzer": {
+      "properties.desired": {}
+    }
+  }
+}
