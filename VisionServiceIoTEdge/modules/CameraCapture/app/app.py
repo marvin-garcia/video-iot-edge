@@ -43,7 +43,7 @@ def create_app(test_config=None):
         except Exception as e:
             return str(e), 500
 
-    @app.route("/image", methods=["GET"])
+    @app.route("/camera/capture", methods=["GET"])
     def get_image():
         global image_stream
 
