@@ -50,4 +50,4 @@ RUN [ "cross-build-end" ]
 COPY ./app /app
 
 ENTRYPOINT [ "python3" ]
-CMD [ "/app/__init__.py" ]
+CMD [ "/app/app.py" ]
