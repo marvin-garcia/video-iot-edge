@@ -47,6 +47,7 @@ RUN rm -rf /var/lib/apt/lists/* \
 
 RUN [ "cross-build-end" ]
 
-COPY . /app
+COPY ./app /app
 
-# CMD [ "python3", "-u", "/app/main.py" ]
+ENTRYPOINT [ "python3" ]
+CMD [ "/app/__init__.py" ]

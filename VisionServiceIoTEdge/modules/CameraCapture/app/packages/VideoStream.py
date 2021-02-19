@@ -16,7 +16,6 @@ class VideoStream:
         try:
             # NOTE: do not use RGB as image format, it messes up with the RaspberryPi camera
             self.stopped = False
-            self.__format = "bgr"
             self.camera = PiCamera()
             self.Q = Queue(maxsize=queue_size)
 
@@ -46,7 +45,7 @@ class VideoStream:
     def more(self):
         return self.Q.qsize() > 0
 
-    def _capture(self, width=640, height=480, framerate=32, delay=0.5):
+    def _capture(self, width=640, height=480, framerate=32, format="rgb"):
         try:
             self.camera.resolution = (width, height)
             self.camera.framerate = framerate
@@ -56,7 +55,7 @@ class VideoStream:
             time.sleep(0.1)
 
             while not self.stopped:
-                for frame in self.camera.capture_continuous(raw_capture, format=self.__format, use_video_port=True):
+                for frame in self.camera.capture_continuous(raw_capture, format=format, use_video_port=True):
 
                     if self.stopped:
                         break
@@ -66,7 +65,7 @@ class VideoStream:
                     self.Q.put(image)
 
                     raw_capture.truncate(0)
-                    time.sleep(delay)
+                    # time.sleep(delay)
 
         except Exception as e:
             self.close()
