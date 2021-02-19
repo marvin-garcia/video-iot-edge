@@ -1,21 +1,52 @@
-FROM arm32v7/python:3.7-slim-buster
+FROM balenalib/rpi-raspbian:buster
+
+# Enforces cross-compilation through Quemu
+RUN [ "cross-build-start" ]
 
 WORKDIR /app
 
-RUN apt-get update
+RUN apt-get update -y && apt-get upgrade -y
 RUN apt-get install -y --no-install-recommends apt-utils
 RUN apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-dev \
     cmake \
     build-essential \
     pkg-config \
     libopenjp2-7-dev \
     zlib1g-dev \
-    libcurl4-openssl-dev
+    curl \
+    wget
+
+# Required for OpenCV
+RUN apt-get install -y \
+    # Hierarchical Data Format
+    libhdf5-dev libhdf5-serial-dev \
+    # for image files
+    libjpeg-dev libtiff5-dev libpng-dev \
+    # for video files
+    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev \
+    # for gui
+    libqt4-test libqtgui4 libqtwebkit4 libgtk2.0-dev \
+    # high def image processing
+    libilmbase-dev \
+    libopenexr23:armhf \
+    # GTK development library
+    libgtk2.0-dev \
+    # extra dependencies for matrix optimization
+    libatlas-base-dev gfortran
 
 COPY requirements.txt ./
-RUN pip install -U pip
-RUN pip install -r requirements.txt
+RUN pip3 install -U pip
+RUN pip3 install --index-url=https://www.piwheels.org/simple -r requirements.txt
 
-COPY . .
+# Cleanup
+RUN rm -rf /var/lib/apt/lists/* \
+    && apt-get -y autoremove
 
-CMD [ "python3", "-u", "./main.py" ]
+RUN [ "cross-build-end" ]
+
+COPY . /app
+
+# CMD [ "python3", "-u", "/app/main.py" ]
