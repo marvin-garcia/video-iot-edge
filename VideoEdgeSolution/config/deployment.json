@@ -20,7 +20,7 @@
           },
           "imageanalyzer": {
             "settings": {
-              "image": "marvingarcia/imageanalyzer:1.8",
+              "image": "marvingarcia/imageanalyzer:2.2",
               "createOptions": ""
             },
             "type": "docker",
@@ -43,8 +43,40 @@
               },
               "DEBUG": {
                 "value": "True"
+              },
+              "LOCAL_STORAGE_URL": {
+                "value": "http://storageblob:11002"
+              },
+              "LOCAL_STORAGE_KEY": {
+                "value": "VWTdYNhaJjbqaKqE82R2EjuBGfDr8HRoIZIG09eeODivEAqTMEnJHV0tMwuoCiDM0VagMu72VMsN1CpnChQhFA=="
+              },
+              "LOCAL_STORAGE_ACCOUNT": {
+                "value": "videoedgestorage"
+              },
+              "LOCAL_STORAGE_CONTAINER": {
+                "value": "imagecontainer"
               }
             },
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "storageblob": {
+            "settings": {
+              "image": "mcr.microsoft.com/azure-blob-storage:latest",
+              "createOptions": "{\"Hostname\":\"storageblob\",\"Env\":[\"LOCAL_STORAGE_ACCOUNT_NAME=videoedgestorage\",\"LOCAL_STORAGE_ACCOUNT_KEY=VWTdYNhaJjbqaKqE82R2EjuBGfDr8HRoIZIG09eeODivEAqTMEnJHV0tMwuoCiDM0VagMu72VMsN1CpnChQhFA==\"],\"HostConfig\":{\"PortBindings\":{\"11002/tcp\":[{\"HostPort\":\"11002\"}]},\"Mounts\":[{\"Target\":\"/var/opt/imagecontainer\",\"Source\":\"imagecontainer\",\"Name\":\"imagecontainer\",\"Type\":\"volume\"}],\"Binds\":[\"imagecontainer:/blobroot\"]}}"
+            },
+            "type": "docker",
+            "version": "1.0",
+            "status": "running",
+            "restartPolicy": "always"
+          },
+          "infiniteloop": {
+            "settings": {
+              "image": "marvingarcia/infiniteloop:1.5",
+              "createOptions": "{\"Hostname\":\"infiniteloop\"}"
+            },
+            "type": "docker",
+            "version": "1.0",
             "status": "running",
             "restartPolicy": "always"
           }
@@ -92,8 +124,25 @@
         }
       }
     },
-    "pythonedgesample": {
-      "properties.desired": {}
+    "storageblob": {
+      "properties.desired": {
+        "deviceAutoDeleteProperties": {
+          "deleteOn": true,
+          "deleteAfterMinutes": 7200,
+          "retainWhileUploading": true
+        },
+        "deviceToCloudUploadProperties": {
+          "uploadOn": true,
+          "uploadOrder": "OldestFirst",
+          "cloudStorageConnectionString": "DefaultEndpointsProtocol=https;AccountName=iotplaygroundstrg;AccountKey=Go+yfoz/aq2IwnP6jfgE49bx89+av4soTlYjNu8rF/hvoElmhhp3i/cl9os1JhYiIP+NAoTK3JPJDYFbFr0Cxg==;EndpointSuffix=core.windows.net",
+          "storageContainersForUpload": {
+            "imagecontainer": {
+              "target": "imagecontainer"
+            }
+          },
+          "deleteAfterUpload": true
+        }
+      }
     },
     "cameracapture": {
       "properties.desired": {}

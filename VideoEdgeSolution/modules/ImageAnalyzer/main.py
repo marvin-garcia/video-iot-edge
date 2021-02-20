@@ -10,8 +10,10 @@ import time
 import asyncio
 import requests
 from six.moves import input
+from datetime import datetime
 from azure.iot.device import Message, MethodResponse
 from azure.iot.device.aio import IoTHubModuleClient
+from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
 
 COUNT = 0
 DEBUG = bool(os.environ['DEBUG']) if "DEBUG" in os.environ else False
@@ -20,6 +22,10 @@ CAMERA_CAPTURE_URL = os.environ['CAMERA_CAPTURE_URL']
 COMPUTER_VISION_URL = os.environ['COMPUTER_VISION_URL']
 COMPUTER_VISION_KEY = os.environ['COMPUTER_VISION_KEY']
 CONFIDENCE_THRESHOLD = float(os.environ['CONFIDENCE_THRESHOLD'])
+LOCAL_STORAGE_URL = os.environ['LOCAL_STORAGE_URL']
+LOCAL_STORAGE_KEY = os.environ['LOCAL_STORAGE_KEY']
+LOCAL_STORAGE_ACCOUNT = os.environ['LOCAL_STORAGE_ACCOUNT']
+LOCAL_STORAGE_CONTAINER = os.environ['LOCAL_STORAGE_CONTAINER']
 
 def set_camera_module(action):
     """Sets the camera module to start or stop"""
@@ -76,6 +82,47 @@ def tag_image(image):
         if DEBUG:
             print("Call to endpoint '%s' returned status code %s. Reason: %s" % (endpoint, str(response.status_code), response.content))
         return None
+
+def get_storage_conn_string(hostname, account_name, account_key):
+    """Returns the connection string of a local storage account containing only blob endpoint and HTTP protocol"""
+
+    blob_endpoint = "%s/%s" % (hostname, account_name)
+    conn_string = "DefaultEndpointsProtocol=http;BlobEndpoint=%s;AccountName=%s;AccountKey=%s;" % (blob_endpoint, account_name, account_key)
+    return conn_string
+
+def initialize_local_storage(conn_string):
+    """
+    Connects to local storage account and creates the specified container if it doesn't exist.
+    """
+
+    if DEBUG:
+        print("Initializing local storage module")
+
+    blob_service_client = BlobServiceClient.from_connection_string(conn_string)
+    containers = list(blob_service_client.list_containers())
+
+    if LOCAL_STORAGE_CONTAINER not in list(filter(lambda x: x['name'] == LOCAL_STORAGE_CONTAINER, containers)):
+        if DEBUG:
+            print("Creating container %s in local storage account %s" % (LOCAL_STORAGE_CONTAINER, LOCAL_STORAGE_ACCOUNT))
+        blob_service_client.create_container(LOCAL_STORAGE_CONTAINER)
+    else:
+        if DEBUG:
+            print("Container %s already exists in local storage account %s" % (LOCAL_STORAGE_CONTAINER, LOCAL_STORAGE_ACCOUNT))
+
+def upload_image_to_container(image, conn_string, container_name, blob_name):
+    """
+    Receives an image and uploads it to a storage account.
+    """
+
+    try:
+        blob_service_client = BlobServiceClient.from_connection_string(conn_string)
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_name)
+        blob_client.upload_blob(image, blob_type="BlockBlob")
+
+        if DEBUG:
+            print("Image %s uploaded to storage successfully" % blob_name)
+    except Exception as e:
+        print("Failed to upload image to blob %s/%s. Reason: %s" % (container_name, blob_name, str(e)))
 
 async def main():
 
@@ -163,9 +210,14 @@ async def main():
         # Run endless loop for recurring tasks
         print ( "Module is running.")
 
+        # Get local storage connection string
+        local_conn_str = get_storage_conn_string(LOCAL_STORAGE_URL, LOCAL_STORAGE_ACCOUNT, LOCAL_STORAGE_KEY)
+        initialize_local_storage(local_conn_str)
+
         # Initialize camera module
         set_camera_module("start")
 
+        # Infinite loop
         while True:
             image = capture_image()
             if image:
@@ -179,10 +231,14 @@ async def main():
                     if DEBUG:
                         print("Total filtered tag count: %s" % str(len(tags)))
 
-                    # Send tags to IoT Hub
                     if tags:
+                        # Send tags to IoT Hub
                         message = Message(json.dumps({"tags": tags}), content_encoding="utf-8", content_type="application/json")
                         await module_client.send_message_to_output(message, "output1")
+
+                        # Upload image to local container
+                        blob_name = "image-%s.png" % datetime.now().strftime("%y%m%d%H%M%S")
+                        upload_image_to_container(image, local_conn_str, LOCAL_STORAGE_CONTAINER, blob_name)
                 else:
                     print("Failed to tag image")
             else:
