@@ -20,7 +20,7 @@
           },
           "imageanalyzer": {
             "settings": {
-              "image": "marvingarcia/imageanalyzer:2.2",
+              "image": "marvingarcia/imageanalyzer:2.3",
               "createOptions": ""
             },
             "type": "docker",
@@ -64,16 +64,6 @@
             "settings": {
               "image": "mcr.microsoft.com/azure-blob-storage:latest",
               "createOptions": "{\"Hostname\":\"storageblob\",\"Env\":[\"LOCAL_STORAGE_ACCOUNT_NAME=videoedgestorage\",\"LOCAL_STORAGE_ACCOUNT_KEY=VWTdYNhaJjbqaKqE82R2EjuBGfDr8HRoIZIG09eeODivEAqTMEnJHV0tMwuoCiDM0VagMu72VMsN1CpnChQhFA==\"],\"HostConfig\":{\"PortBindings\":{\"11002/tcp\":[{\"HostPort\":\"11002\"}]},\"Mounts\":[{\"Target\":\"/var/opt/imagecontainer\",\"Source\":\"imagecontainer\",\"Name\":\"imagecontainer\",\"Type\":\"volume\"}],\"Binds\":[\"imagecontainer:/blobroot\"]}}"
-            },
-            "type": "docker",
-            "version": "1.0",
-            "status": "running",
-            "restartPolicy": "always"
-          },
-          "infiniteloop": {
-            "settings": {
-              "image": "marvingarcia/infiniteloop:1.5",
-              "createOptions": "{\"Hostname\":\"infiniteloop\"}"
             },
             "type": "docker",
             "version": "1.0",

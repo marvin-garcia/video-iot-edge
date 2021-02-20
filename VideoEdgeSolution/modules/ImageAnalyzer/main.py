@@ -101,13 +101,13 @@ def initialize_local_storage(conn_string):
     blob_service_client = BlobServiceClient.from_connection_string(conn_string)
     containers = list(blob_service_client.list_containers())
 
-    if LOCAL_STORAGE_CONTAINER not in list(filter(lambda x: x['name'] == LOCAL_STORAGE_CONTAINER, containers)):
+    if len(list(filter(lambda x: x['name'] == LOCAL_STORAGE_CONTAINER, containers))) == 0:
         if DEBUG:
-            print("Creating container %s in local storage account %s" % (LOCAL_STORAGE_CONTAINER, LOCAL_STORAGE_ACCOUNT))
+            print("Creating container '%s' in local storage account '%s'" % (LOCAL_STORAGE_CONTAINER, LOCAL_STORAGE_ACCOUNT))
         blob_service_client.create_container(LOCAL_STORAGE_CONTAINER)
     else:
         if DEBUG:
-            print("Container %s already exists in local storage account %s" % (LOCAL_STORAGE_CONTAINER, LOCAL_STORAGE_ACCOUNT))
+            print("Container '%s' already exists in local storage account '%s'" % (LOCAL_STORAGE_CONTAINER, LOCAL_STORAGE_ACCOUNT))
 
 def upload_image_to_container(image, conn_string, container_name, blob_name):
     """

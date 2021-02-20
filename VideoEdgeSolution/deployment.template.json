@@ -46,7 +46,7 @@
           },
           "imageanalyzer": {
             "settings": {
-              "image": "marvingarcia/imageanalyzer:2.2",
+              "image": "marvingarcia/imageanalyzer:2.3",
               "createOptions": ""
             },
             "type": "docker",
