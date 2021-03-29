@@ -1,3 +1,4 @@
 Dockerfile.*
 module.json
 .gitignore
+working-with-blobs.py
